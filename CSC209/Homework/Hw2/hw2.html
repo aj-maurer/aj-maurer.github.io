@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="hw2Styles.css">
+        <script>
+            var isGray = false;
+            var textIsChanged = false;
+            function changeTextColor() {
+                var x = document.getElementsByClassName("testClass1");
+                for (let i = 0; i < x.length; i++) {
+                    x[i].style.color = "red";
+                }
+            }
+            function changeDiv1Color() {
+                console.log("isGray " + isGray);
+                var y = document.getElementById("div1");
+                var b = document.getElementById("divSwitcher");
+                if (isGray) {
+                    y.style.backgroundColor = "aqua";
+                    b.innerHTML = "Click this to make the Div gray"
+                    isGray = false;
+                    return;
+                }
+                y.style.backgroundColor = "gray";
+                b.innerHTML = "Click this to make the Div aqua";
+                isGray = true;
+            }
+            function changeClass2() {
+                var class2 = document.getElementsByClassName("testClass2");
+                for (let i = 0; i < class2.length; i++) {
+                    class2[i].innerHTML = "THING CHANGED!";
+                }
+                
+            }
+        </script>
+    </head>
+    <body>
+        <h1>Links to Homework 2 Sites</h1>
+        <ul>
+            <li><a href="tutorial.html">Tutorials</a></li>
+            <li><a href="technical.html">Technical/Creative</a></li>
+        </ul>
+
+        <h1 class="testClass1">Below is a bunch of junk I was working on in class</h1>
+        <p class="testClass1">Paragraph, test class 1</p>
+        <h2 class="testClass2">Heading 2, test class 2</h2>
+        <p class="testClass2">Paragraph, test class 2</p>
+        <div id="div1" style="background-color:aqua"></div>
+        <button onclick="changeTextColor()">Click this to change the color of items of test class 1 to red</button>
+        <button onclick="changeClass2()">Click this to change attributes of items of test class 2</button>
+        <button id="divSwitcher" onclick="changeDiv1Color()">Click this to make the Div gray</button>
+    </body>
+</html>

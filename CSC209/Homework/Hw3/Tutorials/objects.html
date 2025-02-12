@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Objects</h1>
+
+<p>Cat object</p>
+
+<p id="demo"></p>
+
+<script>
+
+const cat = {
+    name: "Roscoe",
+    color: "orange",
+    age: 3,
+    temperament: "scary"
+}
+const cat2 = {
+    name: "Tinker",
+    color: "gray",
+    age: 7,
+    temperament: "friendly"
+}
+const cat3 = {
+    name: "Binky",
+    color: "purple",
+    age: 43,
+    temperament: "mellow"
+}
+
+const cats = [cat, cat2, cat3];
+
+function listCats() {
+  for (let i = 0; i < cats.length; i++) {
+    document.getElementById("demo").innerHTML += cats[i].name +
+    " is a " +
+    cats[i].age +
+    "-year-old " +
+    cats[i].temperament +
+    " " +
+    cats[i].color +
+    " cat. <br /><br />";
+  }
+}
+
+listCats();
+
+</script>
+
+</body>
+</html>
