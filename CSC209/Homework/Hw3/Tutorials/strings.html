@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Strings</title>
+  </head>
+  <body>
+    <h1>Strings</h1>
+
+    <p>The length of the string is:</p>
+    <p id="demo1"></p>
+
+    <script>
+      let text = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      document.getElementById("demo1").innerHTML = text.length;
+    </script>
+
+<p id="demo2"></p>
+    <script>
+      let text2 = `The quick
+        brown fox
+        jumps over
+        the lazy dog`;
+
+      document.getElementById("demo2").innerHTML = text2;
+    </script>
+    <p>Don't create strings as objects. Also, Javascript objects cannot be compared.</p>
+  </body>
+</html>
