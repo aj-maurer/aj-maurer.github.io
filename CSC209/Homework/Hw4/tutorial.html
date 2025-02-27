@@ -1,0 +1,96 @@
+<html>
+  <head>
+    <title>Week 4 Tutorials</title>
+  </head>
+  <body>
+    <h1>Week 4 Tutorials</h1>
+    <h2>Input</h2>
+    <div id="hiddenInputContainer" style="visibility: hidden">Test</div>
+    <br>
+    <div id="inputContainer"></div>
+
+    <canvas id="myCanvas" width="300" height="300" style="border:1px solid #000000;"></canvas>
+
+    <script>
+
+        const canvas = document.getElementById("myCanvas");
+        const ctx = canvas.getContext("2d");
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(30, 30);
+        ctx.moveTo(canvas.width, 0);
+        ctx.lineTo(canvas.width - 30, 30);
+        ctx.moveTo(canvas.width/2, canvas.height/2);
+        ctx.lineTo(canvas.width/2, canvas.height);
+        ctx.lineWidth = 10;
+        ctx.stroke();
+
+
+      const inputElements = [
+        {
+          type: "button",
+          value: "Toggle text display",
+          onclick: "toggleText()",
+        },
+        {
+          type: "checkbox",
+          onclick: "checkboxCheck(this)",
+        },
+        {
+          id: "picker",
+          type: "color",
+        },
+        {
+            type:"date"
+        },
+        {
+            type:"radio"
+        },
+        {
+            type:"radio"
+        }
+      ];
+
+      inputElements.forEach(generateInputElement);
+      function generateInputElement(obj) {
+        let x = document.createElement("INPUT");
+        let container = document.getElementById("inputContainer");
+
+        for (const [key, value] of Object.entries(obj)) {
+            console.log(key + " " + value);
+            if (key != "input") {
+                x.setAttribute(key, value);
+            } else if (key == "input") {
+                //BELOW ISN'T WORKING
+                //x.addEventListener("input", value);
+            }
+        }
+
+        inputContainer.appendChild(x);
+        inputContainer.innerHTML += "<br>";
+      }
+
+      let picker = document.getElementById("picker");
+      picker.addEventListener("input", setTextColor);
+
+      function toggleText() {
+        let x = document.getElementById("hiddenInputContainer");
+        x.style.visibility =
+          x.style.visibility == "visible" ? "hidden" : "visible";
+      }
+
+      function checkboxCheck(checkboxObj) {
+        let x = document.getElementById("hiddenInputContainer");
+        x.innerHTML = checkboxObj.checked ? "The checkbox is checked" : "The checkbox is not checked";
+      }
+
+      function setTextColor() {
+        console.log("setTextColor is running...");
+        let x = document.getElementById("hiddenInputContainer");
+        let picker = document.getElementById("picker");
+        x.style.color = picker.value;
+      }
+    </script>
+  </body>
+</html>
