@@ -1,5 +1,5 @@
 class Particle {
-  constructor(ctx, startX, startY, radius, angle, velocity, wiggle, color, traceOn, traceLength) {
+  constructor(ctx, startX, startY, radius, angle, velocity, wiggle, color, traceOn, traceLength, traceColor) {
     this.ctx = ctx;
     this.x = startX;
     this.y = startY;
@@ -15,6 +15,7 @@ class Particle {
     this.trace = [];
     this.traceOn = traceOn;
     this.traceLength = traceLength;
+    this.traceColor = traceColor;
   }
 
   move() {
@@ -60,7 +61,7 @@ class Particle {
 
     if (this.traceOn) {
       this.trace.forEach( (element) => {
-        c.strokeStyle = "#bcbcbc";
+        c.strokeStyle = this.traceColor;
         c.beginPath();
         c.arc(element.x, element.y, this.radius, 0, 2*Math.PI);
         c.stroke();
@@ -84,6 +85,4 @@ class Particle {
 
     c.resetTransform();
   }
-
-
 }

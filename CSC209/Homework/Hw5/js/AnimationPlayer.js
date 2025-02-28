@@ -11,7 +11,7 @@ class AnimationPlayer {
     this.globalTraceLength = 20;
     //this.globalTraceColor = "#eeeeee"
     this.backgroundColor = "#999999";
-    this.centerColor = "#ffffff";
+    this.centerColor = "#26992f";
     this.colorVariation = 50;
     this.animationSpeed = 30;
     this.paused = false;
@@ -33,8 +33,9 @@ class AnimationPlayer {
       let color = this.getAnalogousColor(this.centerColor);
       let traceOn = this.globalTraceOn;
       let traceLength = this.globalTraceLength;
+      let traceColor = this.getTraceColor(color);
       this.particles.push(
-        new Particle(this.ctx, x, y, radius, angle, velocity, wiggle, color, traceOn, traceLength)
+        new Particle(this.ctx, x, y, radius, angle, velocity, wiggle, color, traceOn, traceLength, traceColor)
       );
     }
     //TODO: Had to use arrow function here because setInterval is being used within a class,
@@ -130,6 +131,7 @@ class AnimationPlayer {
     //Set randomized similar colors for current particles based on updated "center color"
     this.particles.forEach((particle) => {
       particle.color = this.getAnalogousColor(this.centerColor);
+      particle.traceColor = this.getTraceColor(particle.color);
     });
   }
 
@@ -170,5 +172,56 @@ class AnimationPlayer {
 
     // Return the RGB values as an object
     return rgb;
+  }
+
+  getTraceColor(color) {
+    //color comes in as "rgb(r, g, b)"
+    let rgbArray = color.slice(4, color.length - 1)
+      .split(",")
+      .map( element => element.trim());
+    rgbArray = rgbArray.map( element => element.trim());
+    console.log("original: " + rgbArray);
+    let hslArray = this.rgbToHsl(rgbArray[0], rgbArray[1], rgbArray[2])
+    let newSaturation = hslArray[1] * 0.5;
+    let newLightness = hslArray[2] + (hslArray[2] / 2);
+    hslArray[1] = newSaturation;
+    hslArray[2] = newLightness;
+
+    let newRgbArray = this.hslToRgb(hslArray[0], hslArray[1], hslArray[2]);
+
+    console.log("new: " + newRgbArray);
+    return `rgb(${newRgbArray[0]}, ${newRgbArray[1]}, ${newRgbArray[2]})`
+  }
+
+  //below from https://www.30secondsofcode.org/js/s/rgb-hex-hsl-hsb-color-format-conversion/
+  rgbToHsl = (r, g, b) => {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const l = Math.max(r, g, b);
+    const s = l - Math.min(r, g, b);
+    const h = s
+      ? l === r
+        ? (g - b) / s
+        : l === g
+        ? 2 + (b - r) / s
+        : 4 + (r - g) / s
+      : 0;
+    return [
+      60 * h < 0 ? 60 * h + 360 : 60 * h,
+      100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0),
+      (100 * (2 * l - s)) / 2,
+    ];
+  }
+
+  //below from https://www.30secondsofcode.org/js/s/rgb-hex-hsl-hsb-color-format-conversion/
+  hslToRgb = (h, s, l) => {
+    s /= 100;
+    l /= 100;
+    const k = n => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = n =>
+      l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    return [255 * f(0), 255 * f(8), 255 * f(4)];
   }
 }

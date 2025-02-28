@@ -30,7 +30,7 @@ function addInputs() {
   numberSubmitButton.addEventListener("click", function () {
     animationPlayer.runAnimation(numberSelector.value);
   });
-  numberSubmitButton.value = "Submit";
+  numberSubmitButton.value = "Add particles";
   container.appendChild(numberSubmitButton);
 
   //Checkbox
@@ -39,6 +39,7 @@ function addInputs() {
   toggleReplaceCheckbox.setAttribute("id", "replaceToggle");
   toggleReplaceCheckbox.addEventListener("click", function () {
     animationPlayer.toggleReplace();
+    numberSubmitButton.value = animationPlayer.replace ? "Replace particles" : "Add particles"
   });
   let checkboxLabel = document.createElement("label");
   checkboxLabel.appendChild(toggleReplaceCheckbox);
