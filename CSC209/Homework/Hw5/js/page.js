@@ -136,4 +136,30 @@ function addInputs() {
   });
   pauseButton.value = "Play/Pause";
   container.appendChild(pauseButton);
-}
+
+  let behaviors = [
+    "wrap",
+    "bounce"
+  ];
+
+  let behaviorSelector = document.createElement("select");
+  behaviors.forEach( (element) => {
+    let option = document.createElement("option");
+    option.value = element;
+    option.innerHTML = element;
+    behaviorSelector.appendChild(option);
+  });
+  behaviorSelector.onchange = function(){
+    animationPlayer.setBehavior(behaviorSelector.value);
+  }
+  console.log(behaviorSelector.value);
+  let behaviorLabel = document.createElement("label");
+  behaviorLabel.appendChild(behaviorSelector);
+  behaviorLabel.appendChild(document.createTextNode("Edge behavior"));
+  container.appendChild(behaviorLabel);
+  }
+  
+
+  function testInput() {
+    console.log("test!");
+  }

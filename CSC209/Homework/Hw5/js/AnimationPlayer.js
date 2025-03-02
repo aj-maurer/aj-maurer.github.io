@@ -9,12 +9,12 @@ class AnimationPlayer {
     this.maxVelocity = 5;
     this.globalTraceOn = false;
     this.globalTraceLength = 20;
-    //this.globalTraceColor = "#eeeeee"
     this.backgroundColor = "#999999";
     this.centerColor = "#26992f";
     this.colorVariation = 50;
     this.animationSpeed = 30;
     this.paused = false;
+    this.edgeMode = "wrap";
   }
 
   //Starts or restarts the animation
@@ -24,9 +24,9 @@ class AnimationPlayer {
       this.particles = [];
     }
     for (let i = 0; i < numParticles; i++) {
-      let x = Math.random() * this.canvas.width;
-      let y = Math.random() * this.canvas.height;
       let radius = 20;
+      let x = (Math.random() * (this.canvas.width - 2*radius)) + radius;
+      let y = (Math.random() * (this.canvas.height - 2*radius)) + radius;
       let angle = Math.random() * this.degToRad(360);
       let velocity = Math.random() * this.maxVelocity;
       let wiggle = this.globalWiggle;
@@ -34,8 +34,9 @@ class AnimationPlayer {
       let traceOn = this.globalTraceOn;
       let traceLength = this.globalTraceLength;
       let traceColor = this.getTraceColor(color);
+      let behavior = this.edgeMode;
       this.particles.push(
-        new Particle(this.ctx, x, y, radius, angle, velocity, wiggle, color, traceOn, traceLength, traceColor)
+        new Particle(this.ctx, x, y, radius, angle, velocity, wiggle, color, traceOn, traceLength, traceColor, behavior)
       );
     }
     //TODO: Had to use arrow function here because setInterval is being used within a class,
@@ -110,16 +111,6 @@ class AnimationPlayer {
     });
   }
 
-  /*
-  setTraceColor(color) {
-    this.globalTraceColor = color;
-
-    this.particles.forEach( (particle) => {
-        particle.traceColor = this.globalTraceColor;
-    });
-  }
-*/
-
   setBGColor(color) {
     this.backgroundColor = color;
   }
@@ -135,6 +126,13 @@ class AnimationPlayer {
     });
   }
 
+  setBehavior(behavior) {
+    this.edgeMode = behavior;
+
+    this.particles.forEach((particle) => {
+      particle.behavior = behavior;
+    });
+  }
   //Utility functions---------------------------
 
   degToRad(deg) {
@@ -152,11 +150,11 @@ class AnimationPlayer {
   modifyComponentValue(c) {
     let newC =
       c + (Math.random() * this.colorVariation - this.colorVariation / 2);
-    //TODO: Make sure it's an int and between 0 and 255
+    //TODO: Make sure it's an int and between 0 and 255?
     return newC;
   }
 
-  //below is from https://itsourcecode.com/javascript-tutorial/javascript-hex-to-rgb-the-magic-of-color-conversion/
+  //from https://itsourcecode.com/javascript-tutorial/javascript-hex-to-rgb-the-magic-of-color-conversion/
   hexToRgbValue(hex) {
     // Remove the hash symbol, if present
     hex = hex.replace(/^#/, "");
@@ -175,7 +173,7 @@ class AnimationPlayer {
   }
 
   getTraceColor(color) {
-    //color comes in as "rgb(r, g, b)"
+    //color comes in as string "rgb(r, g, b)"
     let rgbArray = color.slice(4, color.length - 1)
       .split(",")
       .map( element => element.trim());
@@ -193,7 +191,7 @@ class AnimationPlayer {
     return `rgb(${newRgbArray[0]}, ${newRgbArray[1]}, ${newRgbArray[2]})`
   }
 
-  //below from https://www.30secondsofcode.org/js/s/rgb-hex-hsl-hsb-color-format-conversion/
+  //from https://www.30secondsofcode.org/js/s/rgb-hex-hsl-hsb-color-format-conversion/
   rgbToHsl = (r, g, b) => {
     r /= 255;
     g /= 255;
@@ -214,7 +212,7 @@ class AnimationPlayer {
     ];
   }
 
-  //below from https://www.30secondsofcode.org/js/s/rgb-hex-hsl-hsb-color-format-conversion/
+  //from https://www.30secondsofcode.org/js/s/rgb-hex-hsl-hsb-color-format-conversion/
   hslToRgb = (h, s, l) => {
     s /= 100;
     l /= 100;
