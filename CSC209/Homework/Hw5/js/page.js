@@ -10,7 +10,7 @@ function stop() {
 }
 
 // All the inputs are added below using js
-// This is a lot of typing, may be easier to just do it in HTML
+// This is a lot of typing, may be easier to just do it in HTML?
 function addInputs() {
   let container = document.getElementById("inputContainer");
 
@@ -137,11 +137,13 @@ function addInputs() {
   pauseButton.value = "Play/Pause";
   container.appendChild(pauseButton);
 
+  //Options for particle behavior when it reaches the edge of the canvas
   let behaviors = [
     "wrap",
     "bounce"
   ];
 
+  //Behavior selector
   let behaviorSelector = document.createElement("select");
   behaviors.forEach( (element) => {
     let option = document.createElement("option");
@@ -157,9 +159,19 @@ function addInputs() {
   behaviorLabel.appendChild(behaviorSelector);
   behaviorLabel.appendChild(document.createTextNode("Edge behavior"));
   container.appendChild(behaviorLabel);
+
+  /*
+  //Preset button (just for testing this out)
+  let presetButton = document.createElement("input");
+  presetButton.setAttribute("type", "button");
+  presetButton.addEventListener("click", function () {
+    animationPlayer.loadPreset();
+  });
+  presetButton.value = "Load a preset";
+  container.appendChild(presetButton);
+  */
   }
   
-
   function testInput() {
     console.log("test!");
   }

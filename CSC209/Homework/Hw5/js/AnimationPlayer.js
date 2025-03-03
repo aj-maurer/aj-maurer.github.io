@@ -1,9 +1,12 @@
+//Class to manage the animation
 class AnimationPlayer {
   constructor() {
     this.currentID = null;
     this.canvas = document.getElementById("myCanvas");
     this.ctx = this.canvas.getContext("2d");
     this.particles = [];
+    this.animationSpeed = 30;
+    this.paused = false;
     this.replace = false;
     this.globalWiggle = 5;
     this.maxVelocity = 5;
@@ -12,10 +15,23 @@ class AnimationPlayer {
     this.backgroundColor = "#999999";
     this.centerColor = "#26992f";
     this.colorVariation = 50;
-    this.animationSpeed = 30;
-    this.paused = false;
     this.edgeMode = "wrap";
   }
+
+  /*
+  presets = [
+    {
+      replace: "true",
+      wiggle: "10",
+      maxVelocity: "75",
+      traceOn: "true",
+      traceLength: "10",
+      backgroundColor: "#cacaca",
+      color: "#2f3f4d",
+      edgeMode: "bounce"
+    }
+  ]
+  */
 
   //Starts or restarts the animation
   runAnimation(numParticles = 10) {
@@ -25,8 +41,9 @@ class AnimationPlayer {
     }
     for (let i = 0; i < numParticles; i++) {
       let radius = 20;
-      let x = (Math.random() * (this.canvas.width - 2*radius)) + radius;
-      let y = (Math.random() * (this.canvas.height - 2*radius)) + radius;
+      //keep x and y within
+      let x = Math.random() * (this.canvas.width - 2 * radius) + radius;
+      let y = Math.random() * (this.canvas.height - 2 * radius) + radius;
       let angle = Math.random() * this.degToRad(360);
       let velocity = Math.random() * this.maxVelocity;
       let wiggle = this.globalWiggle;
@@ -36,7 +53,20 @@ class AnimationPlayer {
       let traceColor = this.getTraceColor(color);
       let behavior = this.edgeMode;
       this.particles.push(
-        new Particle(this.ctx, x, y, radius, angle, velocity, wiggle, color, traceOn, traceLength, traceColor, behavior)
+        new Particle(
+          this.ctx,
+          x,
+          y,
+          radius,
+          angle,
+          velocity,
+          wiggle,
+          color,
+          traceOn,
+          traceLength,
+          traceColor,
+          behavior
+        )
       );
     }
     //TODO: Had to use arrow function here because setInterval is being used within a class,
@@ -46,6 +76,21 @@ class AnimationPlayer {
       this.drawAnimation(this.ctx, this.particles);
     }, this.animationSpeed);
   }
+
+  /*
+  //Load a preset. Just messing around, this isn't fully implemented.
+  // Doesn't update html input elements.
+  loadPreset(preset = this.presets[0]) {
+    this.replace = preset.replace;
+    this.setWiggle(preset.wiggle);
+    this.setMaxVelocity(preset.maxVelocity);
+    this.setTrace(preset.traceOn);
+    this.setTraceLength(preset.traceLength);
+    this.setBGColor(preset.backgroundColor);
+    this.setColor(preset.color);
+    this.setBehavior(preset.edgeMode);
+  }
+  */
 
   //Draws each frame
   drawAnimation(context, particles) {
@@ -57,7 +102,7 @@ class AnimationPlayer {
     particles.forEach(this.drawParticle);
   }
 
-  //runs each frame
+  //runs each frame for each particle
   drawParticle(particle) {
     particle.draw();
     particle.move();
@@ -66,12 +111,14 @@ class AnimationPlayer {
 
   stopAnimation() {
     clearInterval(this.currentID);
+    this.currentID = null;
   }
 
   togglePause() {
     this.paused = this.paused ? false : true;
   }
 
+  //Toggle whether to add or replace particles
   toggleReplace() {
     this.replace = this.replace ? false : true;
   }
@@ -94,20 +141,29 @@ class AnimationPlayer {
     });
   }
 
+  setTrace(on) {
+    this.globalTraceOn = on;
+
+    this.particles.forEach((particle) => {
+      particle.traceOn = this.globalTraceOn;
+    });
+  }
+
   setTraceLength(length) {
     this.globalTraceLength = length;
 
-    this.particles.forEach( (particle) => {
-        particle.traceLength = this.globalTraceLength;
+    this.particles.forEach((particle) => {
+      particle.traceLength = this.globalTraceLength;
     });
   }
 
   toggleTrace() {
+    //For future particles
     this.globalTraceOn = this.globalTraceOn ? false : true;
 
-    console.log("trace: " + this.globalTraceOn);
-    this.particles.forEach( (particle) => {
-        particle.traceOn = this.globalTraceOn;
+    //For current particles
+    this.particles.forEach((particle) => {
+      particle.traceOn = this.globalTraceOn;
     });
   }
 
@@ -133,12 +189,15 @@ class AnimationPlayer {
       particle.behavior = behavior;
     });
   }
+
   //Utility functions---------------------------
 
   degToRad(deg) {
     return deg * (Math.PI / 180);
   }
 
+  //Return a color that is similar to the current centerColor, but not the same.
+  // Assumes centerColor is specified as a hex value.
   getAnalogousColor() {
     let centerColorRGB = this.hexToRgbValue(this.centerColor);
     let newR = this.modifyComponentValue(centerColorRGB.r);
@@ -147,6 +206,7 @@ class AnimationPlayer {
     return `rgb(${newR}, ${newG}, ${newB})`;
   }
 
+  //Modify R, G, or B component individually
   modifyComponentValue(c) {
     let newC =
       c + (Math.random() * this.colorVariation - this.colorVariation / 2);
@@ -172,23 +232,28 @@ class AnimationPlayer {
     return rgb;
   }
 
+  //Return a color that is less-saturated and lighter than the given color
+  // color comes as a string formatted as "rgb(r, g, b)"
   getTraceColor(color) {
-    //color comes in as string "rgb(r, g, b)"
-    let rgbArray = color.slice(4, color.length - 1)
+    //Create an array [r,g,b] from the string
+    let rgbArray = color
+      .slice(4, color.length - 1)
       .split(",")
-      .map( element => element.trim());
-    rgbArray = rgbArray.map( element => element.trim());
-    console.log("original: " + rgbArray);
-    let hslArray = this.rgbToHsl(rgbArray[0], rgbArray[1], rgbArray[2])
+      .map((element) => element.trim());
+    rgbArray = rgbArray.map((element) => element.trim());
+
+    //Get HSL values to make it easier to modify saturation and lightness.
+    // Leave the hue alone.
+    let hslArray = this.rgbToHsl(rgbArray[0], rgbArray[1], rgbArray[2]);
     let newSaturation = hslArray[1] * 0.5;
-    let newLightness = hslArray[2] + (hslArray[2] / 2);
+    let newLightness = hslArray[2] + hslArray[2] / 2;
     hslArray[1] = newSaturation;
     hslArray[2] = newLightness;
 
     let newRgbArray = this.hslToRgb(hslArray[0], hslArray[1], hslArray[2]);
 
     console.log("new: " + newRgbArray);
-    return `rgb(${newRgbArray[0]}, ${newRgbArray[1]}, ${newRgbArray[2]})`
+    return `rgb(${newRgbArray[0]}, ${newRgbArray[1]}, ${newRgbArray[2]})`;
   }
 
   //from https://www.30secondsofcode.org/js/s/rgb-hex-hsl-hsb-color-format-conversion/
@@ -210,16 +275,16 @@ class AnimationPlayer {
       100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0),
       (100 * (2 * l - s)) / 2,
     ];
-  }
+  };
 
   //from https://www.30secondsofcode.org/js/s/rgb-hex-hsl-hsb-color-format-conversion/
   hslToRgb = (h, s, l) => {
     s /= 100;
     l /= 100;
-    const k = n => (n + h / 30) % 12;
+    const k = (n) => (n + h / 30) % 12;
     const a = s * Math.min(l, 1 - l);
-    const f = n =>
+    const f = (n) =>
       l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
     return [255 * f(0), 255 * f(8), 255 * f(4)];
-  }
+  };
 }
