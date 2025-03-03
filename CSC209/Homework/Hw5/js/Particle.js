@@ -129,6 +129,12 @@ class Particle {
     c.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
     c.fill();
 
+    //Draw small white center circle
+    c.fillStyle = "#ffffff";
+    c.beginPath();
+    c.arc(this.x, this.y, this.radius/5, 0, 2 * Math.PI);
+    c.fill();
+
     //Draw the arrow
     c.strokeStyle = "black";
     c.beginPath();

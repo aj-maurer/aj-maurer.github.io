@@ -12,7 +12,7 @@ class AnimationPlayer {
     this.maxVelocity = 5;
     this.globalTraceOn = false;
     this.globalTraceLength = 20;
-    this.backgroundColor = "#999999";
+    this.backgroundColor = "#bbbbbb";
     this.centerColor = "#26992f";
     this.colorVariation = 50;
     this.edgeMode = "wrap";
@@ -40,7 +40,7 @@ class AnimationPlayer {
       this.particles = [];
     }
     for (let i = 0; i < numParticles; i++) {
-      let radius = 20;
+      let radius = Math.random() * 20 + 5;
       //keep x and y within
       let x = Math.random() * (this.canvas.width - 2 * radius) + radius;
       let y = Math.random() * (this.canvas.height - 2 * radius) + radius;
