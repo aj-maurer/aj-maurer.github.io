@@ -111,20 +111,20 @@ class Particle {
   //Draw this particle
   draw() {
     let c = this.ctx;
-    c.fillStyle = this.color;
     this.lineLength = this.velocity * 20;
 
     if (this.traceOn) {
       //Draw the trace
       this.trace.forEach((element) => {
-        c.strokeStyle = this.traceColor;
+        c.fillStyle = this.traceColor;
         c.beginPath();
         c.arc(element.x, element.y, this.radius, 0, 2 * Math.PI);
-        c.stroke();
+        c.fill();
       });
     }
 
     //Draw the circle
+    c.fillStyle = this.color;
     c.beginPath();
     c.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
     c.fill();
