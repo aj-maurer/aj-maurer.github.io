@@ -111,8 +111,10 @@ class Particle {
   //Draw this particle
   draw() {
     let c = this.ctx;
+    //Update line length and offscreen length based on current velocity
     this.lineLength = this.velocity * 20;
-
+    this.offscreenLength = Math.max(this.radius, this.lineLength);
+    
     if (this.traceOn) {
       //Draw the trace
       this.trace.forEach((element) => {
