@@ -1,8 +1,8 @@
 class GameOfLife {
-  constructor(cellsWide, cellsHigh) {
+  constructor(cellsWide, cellsHigh, clusters, clusterRadius, clusterPattern) {
     this.currentID = null;
     this.animate = false;
-    this.speed = 200;
+    this.speed = document.getElementById("speedSlider").max - document.getElementById("speedSlider").value;
     this.canvas = document.getElementById("myCanvas");
     this.dragging = false;
     this.cellsToCheck = [];
@@ -10,15 +10,24 @@ class GameOfLife {
     this.ctx = this.canvas.getContext("2d");
     this.cellsWide = cellsWide;
     this.cellsHigh = cellsHigh;
-    this.cellWidth = this.canvas.width / cellsWide;
-    this.cellHeight = this.canvas.height / cellsHigh;
+    this.cellWidth = this.canvas.width / this.cellsWide;
+    this.cellHeight = this.canvas.height / this.cellsHigh;
+    if (clusters !== undefined) {
+      this.clusters = clusters;
+    }
+    if (clusterRadius !== undefined) {
+      this.clusterRadius = clusterRadius;
+    }
+    if (clusterPattern !== undefined) {
+      this.clusterPattern = clusterPattern;
+
+    }
     //Main array
     this.rows = [];
     //fill rows array with random 0 or 1 values
     for (let i = 0; i < this.cellsHigh; i++) {
       this.rows[i] = [];
       for (let j = 0; j < this.cellsWide; j++) {
-        //let canvasPoint = this.getCanvasPoint(j, i);
         this.rows[i][j] = new Cell(
           this.ctx,
           j,
@@ -31,7 +40,8 @@ class GameOfLife {
       }
     }
     this.setupInteraction(this.canvas);
-    this.generateClusters();
+    this.generateClusters(this.clusters, this.clusterRadius, this.clusterPattern);
+    console.log("cellWidth: " + this.cellWidth + ", " + this.cellHeight);
     this.drawAll();
   }
 
@@ -39,6 +49,7 @@ class GameOfLife {
     canvas.addEventListener("mousedown", this.onMouseDown.bind(this), false);
     canvas.addEventListener("mousemove", this.onMouseMove.bind(this), false);
     canvas.addEventListener("mouseup", this.onMouseUp.bind(this), false);
+    //canvas.addEventListener("mouseleave", this.onMouseLeave.bind(this), false);
   }
 
   onMouseDown() {
@@ -46,7 +57,6 @@ class GameOfLife {
   }
 
   onMouseMove(e) {
-
     if(this.dragging) {
     let cell = this.getHoveredCell(e.offsetX, e.offsetY);
     //add cell to array of cells to check
@@ -77,11 +87,19 @@ class GameOfLife {
     this.dragging = false;
 
     this.cellsToCheck.forEach((c) => {
-      this.drawThenSetNextFrame(c);
+      this.setNextFrame(c);
     })
   
     this.cellsToCheck = [];
   }
+
+  /*
+  onMouseLeave() {
+    if (this.dragging) {
+      this.onMouseUp();
+    }
+  }
+*/
 
   //x and y are canvas coordinates in pixels
   getHoveredCell(x, y) {
@@ -104,10 +122,12 @@ class GameOfLife {
     return this.rows[cellY][cellX];
   }
 
-  generateClusters(numClusters, clusterRadius) {
+  generateClusters(numClusters, clusterRadius, pattern) {
     //some random cluster centers
-    numClusters = Math.floor(Math.random() * 8 + 2);
-    clusterRadius = this.cellsWide/2;
+    //let numClusters = numClusters;
+    //let clusterRadius = clusterRadius;
+    //let pattern = pattern;
+
     let clusterPoints = [];
     let counter = 0;
     for (let i = 0; i < numClusters; i++) {
@@ -137,12 +157,12 @@ class GameOfLife {
         //set aliveNextFrame based on how close the cell is to its closest cluster point's center
         let likelihood = Math.min(distance, clusterRadius) / clusterRadius;
         this.rows[i][j].aliveNextFrame = Math.random() > likelihood ? 1 : 0;
-        if (this.rows[i][j].aliveNextFrame === 1 && counter === 0) {
+        if (counter === 0) {
           this.rows[i][j].aliveNextFrame = 0;
         }
         counter++;
         //TODO: what to call this?
-        if (counter > 2) {
+        if (counter > pattern) {
           counter = 0;
         }
       }
@@ -158,22 +178,33 @@ class GameOfLife {
 
   toggleAnimation() {
     this.animate = this.animate ? this.stopAnimation() : this.startAnimation();
+    return this.animate;
   }
 
   startAnimation() {
     this.currentID = setInterval(() => {
         this.drawAll();
       }, this.speed);
-    return true;
+    this.animate = true;
+    return this.animate;
   }
   
   stopAnimation() {
     if (this.currentID !== null) {
         clearInterval(this.currentID);
     }
-    return false;
+    this.animate = false;
+    return this.animate;
   }
 
+  setSpeed(speed) {
+    let a = this.animate;
+    this.stopAnimation();
+    this.speed = speed;
+    if (a) {
+      this.startAnimation();
+    }
+  }
   drawAll() {
     this.ctx.fillStyle = "#ffffff";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -192,17 +223,23 @@ class GameOfLife {
     for (let i = 0; i < this.cellsHigh; i++) {
       for (let j = 0; j < this.cellsWide; j++) {
         cell = this.rows[i][j];
-        this.drawThenSetNextFrame(cell);
+        this.drawCell(cell);
+        this.setNextFrame(cell);
       }
     }
   }
 
+  drawCell(cell) {
+    if (cell.alive === 1) {
+      cell.draw();
+    }
+  }
+
   //set whether cell is alive or dead next frame
-  drawThenSetNextFrame(cell) {
+  setNextFrame(cell) {
     //console.log(cell);
     let neighborCount = this.getNeighborCount(cell);
         if (cell.alive === 1) {
-          cell.draw();
           if (neighborCount < 2 || neighborCount > 3) {
             cell.aliveNextFrame = 0;
           } else {

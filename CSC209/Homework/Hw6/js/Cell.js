@@ -17,6 +17,7 @@ class Cell {
 
     draw() {
         this.ctx.fillRect(this.canvasPoint.x, this.canvasPoint.y, this.width, this.height);
+        console.log("cell width and height: " + this.width + ", " + this.height);
     }
 
     clear() {
