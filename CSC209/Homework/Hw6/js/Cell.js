@@ -18,4 +18,9 @@ class Cell {
     draw() {
         this.ctx.fillRect(this.canvasPoint.x, this.canvasPoint.y, this.width, this.height);
     }
+
+    clear() {
+        this.ctx.fillStyle = "#ffffff";
+        this.ctx.fillRect(this.canvasPoint.x, this.canvasPoint.y, this.width, this.height);
+    }
 }

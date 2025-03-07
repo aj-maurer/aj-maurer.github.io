@@ -26,7 +26,7 @@ class GameOfLife {
           this.cellWidth,
           this.cellHeight
         );
-        //TODO: generate more interesting starting patterns
+        //below is for overall randomness
         //this.rows[i][j].aliveNextFrame = Math.random() > 0.5 ? 1 : 0;
       }
     }
@@ -37,18 +37,12 @@ class GameOfLife {
 
   setupInteraction(canvas) {
     canvas.addEventListener("mousedown", this.onMouseDown.bind(this), false);
-    /*
-    canvas.addEventListener("mousemove", (e) => {
-      this.onMouseMove(e);
-    });
-    */
     canvas.addEventListener("mousemove", this.onMouseMove.bind(this), false);
     canvas.addEventListener("mouseup", this.onMouseUp.bind(this), false);
   }
 
   onMouseDown() {
     this.dragging = true;
-    console.log(this.dragging);
   }
 
   onMouseMove(e) {
@@ -59,10 +53,21 @@ class GameOfLife {
     
     if (this.animate) {
       cell.aliveNextFrame = 1;
-    } else {
-      cell.aliveNextFrame = 1;
+    } else if (this.drawBlack) {
+      //drawing black
+      cell.alive = 1;
       cell.draw();
-      this.cellsToCheck.push(cell);
+      if (!this.cellsToCheck.includes(cell)) {
+        this.cellsToCheck.push(cell);
+      }
+    } else {
+      //NOT WORKING
+      //drawing white
+      cell.alive = 0;
+      cell.clear();
+      if (!this.cellsToCheck.includes(cell)) {
+        this.cellsToCheck.push(cell);
+      }
     }
     }
   }
@@ -76,7 +81,6 @@ class GameOfLife {
     })
   
     this.cellsToCheck = [];
-    console.log(this.dragging);
   }
 
   //x and y are canvas coordinates in pixels
@@ -96,8 +100,6 @@ class GameOfLife {
     if (cellY > this.cellsHigh - 1) {
       cellY = this.cellsHigh -1;
     }
-
-    //console.log(`${cellX}, ${cellY}`);
 
     return this.rows[cellY][cellX];
   }
@@ -203,11 +205,15 @@ class GameOfLife {
           cell.draw();
           if (neighborCount < 2 || neighborCount > 3) {
             cell.aliveNextFrame = 0;
+          } else {
+            //Need this for cells that are drawn in
+            cell.aliveNextFrame = 1;
           }
         } else if (neighborCount === 3) {
           cell.aliveNextFrame = 1;
+        } else {
+          cell.aliveNextFrame = 0;
         }
-        console.log("draw next frame?: " + cell.aliveNextFrame);
   }
 
   getNeighborCount(cell) {
@@ -255,7 +261,6 @@ class GameOfLife {
       //check right
       neighborCount += this.rows[y][x + 1].alive;
     }
-    console.log(neighborCount);
     return neighborCount;
   }
 
