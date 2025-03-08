@@ -1,8 +1,14 @@
+//TODO: First frame after something is drawn doesn't follow the rules correctly,
+// and result changes depending on 
+// the order in which things were drawn. Fix it!
+
 class GameOfLife {
   constructor(cellsWide, cellsHigh, clusters, clusterRadius, clusterPattern) {
     this.currentID = null;
     this.animate = false;
-    this.speed = document.getElementById("speedSlider").max - document.getElementById("speedSlider").value;
+    this.speed =
+      document.getElementById("speedSlider").max -
+      document.getElementById("speedSlider").value;
     this.canvas = document.getElementById("myCanvas");
     this.dragging = false;
     this.cellsToCheck = [];
@@ -20,11 +26,10 @@ class GameOfLife {
     }
     if (clusterPattern !== undefined) {
       this.clusterPattern = clusterPattern;
-
     }
     //Main array
     this.rows = [];
-    //fill rows array with random 0 or 1 values
+    //fill array with cells
     for (let i = 0; i < this.cellsHigh; i++) {
       this.rows[i] = [];
       for (let j = 0; j < this.cellsWide; j++) {
@@ -35,78 +40,78 @@ class GameOfLife {
           this.cellWidth,
           this.cellHeight
         );
-        //below is for overall randomness
-        //this.rows[i][j].aliveNextFrame = Math.random() > 0.5 ? 1 : 0;
       }
     }
-    this.setupInteraction(this.canvas);
-    this.generateClusters(this.clusters, this.clusterRadius, this.clusterPattern);
-    console.log("cellWidth: " + this.cellWidth + ", " + this.cellHeight);
-    this.drawAll();
+    this.setupInteraction();
+    //Generate somewhat interesting random clusters of living cells
+    this.generateClusters(
+      this.clusters,
+      this.clusterRadius,
+      this.clusterPattern
+    );
+    this.step();
   }
 
-  setupInteraction(canvas) {
-    canvas.addEventListener("mousedown", this.onMouseDown.bind(this), false);
-    canvas.addEventListener("mousemove", this.onMouseMove.bind(this), false);
-    canvas.addEventListener("mouseup", this.onMouseUp.bind(this), false);
-    //canvas.addEventListener("mouseleave", this.onMouseLeave.bind(this), false);
+  setupInteraction() {
+    this.onMouseDown = this.onMouseDown.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
+    this.onMouseUp = this.onMouseUp.bind(this);
+
+    this.canvas.addEventListener("mousedown", this.onMouseDown);
+    this.canvas.addEventListener("mousemove", this.onMouseMove);
+    this.canvas.addEventListener("mouseup", this.onMouseUp);
   }
 
+  removeListeners() {
+    this.canvas.removeEventListener("mousedown", this.onMouseDown);
+    this.canvas.removeEventListener("mousemove", this.onMouseMove);
+    this.canvas.removeEventListener("mouseup", this.onMouseUp);
+  }
+  
   onMouseDown() {
     this.dragging = true;
   }
 
   onMouseMove(e) {
-    if(this.dragging) {
-    let cell = this.getHoveredCell(e.offsetX, e.offsetY);
-    //add cell to array of cells to check
-    
-    if (this.animate) {
-      cell.aliveNextFrame = 1;
-    } else if (this.drawBlack) {
-      //drawing black
-      cell.alive = 1;
-      cell.draw();
-      if (!this.cellsToCheck.includes(cell)) {
-        this.cellsToCheck.push(cell);
-      }
-    } else {
-      //NOT WORKING
-      //drawing white
+    if (this.dragging) {
+      let cell = this.getHoveredCell(e.offsetX, e.offsetY);
+      if (this.animate) {
+        cell.aliveNextFrame = 1;
+      } else if (this.drawBlack) {
+        cell.draw();
+        //Add cell to array of cells to check
+        if (!this.cellsToCheck.includes(cell)) {
+          cell.alive = 1; //At this point cell.aliveNextFrame could be 0
+          this.cellsToCheck.push(cell);
+        }
+      } else {
+        //NOT WORKING
+        //drawing white
+        /*
       cell.alive = 0;
       cell.clear();
       if (!this.cellsToCheck.includes(cell)) {
         this.cellsToCheck.push(cell);
       }
-    }
+        */
+      }
     }
   }
 
   onMouseUp() {
-    //check for all neighbors on mouseup?
     this.dragging = false;
-
     this.cellsToCheck.forEach((c) => {
       this.setNextFrame(c);
-    })
-  
-    this.cellsToCheck = [];
+    });
+    //this.cellsToCheck = [];
   }
-
-  /*
-  onMouseLeave() {
-    if (this.dragging) {
-      this.onMouseUp();
-    }
-  }
-*/
 
   //x and y are canvas coordinates in pixels
   getHoveredCell(x, y) {
     let cellX = Math.floor(x / this.cellWidth);
     let cellY = Math.floor(y / this.cellHeight);
 
-    if (cellX < 0 ) {
+    if (cellX < 0) {
       cellX = 0;
     }
     if (cellX > this.cellsWide - 1) {
@@ -116,52 +121,55 @@ class GameOfLife {
       cellY = 0;
     }
     if (cellY > this.cellsHigh - 1) {
-      cellY = this.cellsHigh -1;
+      cellY = this.cellsHigh - 1;
     }
 
     return this.rows[cellY][cellX];
   }
 
+  //Initialize random clusters of alive (black) cells
+  // (just to have something to start with)
   generateClusters(numClusters, clusterRadius, pattern) {
-    //some random cluster centers
-    //let numClusters = numClusters;
-    //let clusterRadius = clusterRadius;
-    //let pattern = pattern;
-
+    //Cluster centers
     let clusterPoints = [];
     let counter = 0;
+    //Cluster centers randomly distributed
     for (let i = 0; i < numClusters; i++) {
       clusterPoints[i] = {
         x: Math.floor(Math.random() * this.cellsWide),
-        y: Math.floor(Math.random() * this.cellsHigh)
-      }
+        y: Math.floor(Math.random() * this.cellsHigh),
+      };
     }
 
-    //for each point in the cell grid, check which cluster point it is closest to
+    //For each cell in the cell grid, check which cluster point it is closest to
+    // Cell is more likely to be black the closer it is to its closest cluster point's center
     for (let i = 0; i < this.cellsHigh; i++) {
       for (let j = 0; j < this.cellsWide; j++) {
         let cellPoint = {
           x: j,
-          y: i
-        }
+          y: i,
+        };
         let distance = this.cellsWide;
         let closestPoint;
         for (let k = 0; k < clusterPoints.length; k++) {
-          //
-          let distanceToClusterPoint = this.getDistance(cellPoint, clusterPoints[k]);
-          if ( distanceToClusterPoint < distance) {
+          let distanceToClusterPoint = this.getDistance(
+            cellPoint,
+            clusterPoints[k]
+          );
+          if (distanceToClusterPoint < distance) {
             closestPoint = clusterPoints[k];
             distance = distanceToClusterPoint;
           }
         }
-        //set aliveNextFrame based on how close the cell is to its closest cluster point's center
+        //Set aliveNextFrame based on how close the cell is to its closest cluster point's center
         let likelihood = Math.min(distance, clusterRadius) / clusterRadius;
         this.rows[i][j].aliveNextFrame = Math.random() > likelihood ? 1 : 0;
+        
+        //Add "overlay" of dead cells in a regular patern to make it more interesting
         if (counter === 0) {
           this.rows[i][j].aliveNextFrame = 0;
         }
         counter++;
-        //TODO: what to call this?
         if (counter > pattern) {
           counter = 0;
         }
@@ -170,10 +178,10 @@ class GameOfLife {
   }
 
   getDistance(point1, point2) {
-    //square root of (x2-x1)**2 + (y2-y1)**2
-    let distance = Math.sqrt((point2.x - point1.x)**2 + (point2.y - point1.y)**2);
+    let distance = Math.sqrt(
+      (point2.x - point1.x) ** 2 + (point2.y - point1.y) ** 2
+    );
     return distance;
-    
   }
 
   toggleAnimation() {
@@ -183,15 +191,15 @@ class GameOfLife {
 
   startAnimation() {
     this.currentID = setInterval(() => {
-        this.drawAll();
-      }, this.speed);
+      this.step();
+    }, this.speed);
     this.animate = true;
     return this.animate;
   }
-  
+
   stopAnimation() {
     if (this.currentID !== null) {
-        clearInterval(this.currentID);
+      clearInterval(this.currentID);
     }
     this.animate = false;
     return this.animate;
@@ -205,7 +213,10 @@ class GameOfLife {
       this.startAnimation();
     }
   }
-  drawAll() {
+
+  //Main loop
+  step() {
+    this.cellsToCheck = [];
     this.ctx.fillStyle = "#ffffff";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.fillStyle = "#000000";
@@ -214,10 +225,10 @@ class GameOfLife {
     //must update alive status of all cells before looping through to check on neighbors
     //How to avoid two for loops here?
     for (let i = 0; i < this.cellsHigh; i++) {
-        for (let j = 0; j < this.cellsWide; j++) {
-            cell = this.rows[i][j];
-            cell.alive = cell.aliveNextFrame;
-        }
+      for (let j = 0; j < this.cellsWide; j++) {
+        cell = this.rows[i][j];
+        cell.alive = cell.aliveNextFrame;
+      }
     }
 
     for (let i = 0; i < this.cellsHigh; i++) {
@@ -229,6 +240,7 @@ class GameOfLife {
     }
   }
 
+  //draw one cell
   drawCell(cell) {
     if (cell.alive === 1) {
       cell.draw();
@@ -237,25 +249,25 @@ class GameOfLife {
 
   //set whether cell is alive or dead next frame
   setNextFrame(cell) {
-    //console.log(cell);
     let neighborCount = this.getNeighborCount(cell);
-        if (cell.alive === 1) {
-          if (neighborCount < 2 || neighborCount > 3) {
-            cell.aliveNextFrame = 0;
-          } else {
-            //Need this for cells that are drawn in
-            cell.aliveNextFrame = 1;
-          }
-        } else if (neighborCount === 3) {
-          cell.aliveNextFrame = 1;
-        } else {
-          cell.aliveNextFrame = 0;
-        }
+    if (cell.alive === 1) {
+      if (neighborCount < 2 || neighborCount > 3) {
+        cell.aliveNextFrame = 0;
+      } else {
+        cell.aliveNextFrame = 1;
+      }
+    } else if (neighborCount === 3) {
+      cell.aliveNextFrame = 1;
+    } //else {
+      //cell.aliveNextFrame = 0;
+    //}
   }
 
+  //Get count of live neighbors
   getNeighborCount(cell) {
     let x = cell.x;
     let y = cell.y;
+    //List of canvas edges the point is touching
     let edges = this.checkEdges(cell);
     let neighborCount = 0;
 
@@ -301,6 +313,7 @@ class GameOfLife {
     return neighborCount;
   }
 
+  //returns array of the canvas edges the point is touching
   checkEdges(cell) {
     let edges = {
       top: cell.y === 0,
