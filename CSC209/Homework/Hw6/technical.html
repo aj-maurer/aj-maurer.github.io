@@ -1,7 +1,7 @@
 <html>
     <head>
         <title>
-            Game of Life tests
+            Andrew Maurer - Game of Life
         </title>
         <link rel="stylesheet" href="css/style.css" />
     </head>
@@ -12,6 +12,7 @@
             <button id="step" onclick="step()">Step</button>
             <button id="animateButton" onclick="toggleAnimation()">Play animation</button>
             <label><input id="speedSlider" type="range" min="500" max="1000" value="900" onchange="setSpeed(this.max - this.value)">Animation speed</label>
+            
             <div id = "initParams">
                 <h2>Initialization parameters</h2>
                 <label><input id="widthInput" type="number" value="100" onchange="init()">Cells wide</label>
@@ -20,10 +21,9 @@
                 <label><input id="radius" type="range" value="10" min="2" max="50" onchange="init()">Cluster radius</label>
                 <label><input id="pattern" type="range" value="2" min="1" max="10" onchange="init()">Pattern number</label>
             </div>
-            <h3>P.S. You can add squares by drawing on the canvas</h3>
+            <p>Draw on the canvas to add or remove cells.</p>            
         </div>
         <canvas id="myCanvas" width="500px" height="500px"></canvas>
-
         <script src="js/Cell.js"></script>
         <script src="js/GameOfLife.js"></script>
         <script src="js/page.js"></script>
