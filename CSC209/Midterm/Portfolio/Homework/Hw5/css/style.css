@@ -1,0 +1,20 @@
+label {
+    display:block;
+
+}
+
+canvas {
+    border: 1px solid black;
+}
+
+#inputContainer {
+    float: left;
+    display: flex;
+    flex-direction:column;
+    width: 300px;
+    margin-right: 20px;
+}
+
+#inputContainer * {
+    margin: 5px;
+}

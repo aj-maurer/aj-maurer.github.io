@@ -108,6 +108,10 @@ class Particle {
     this.angle += Math.sin(this.counter) * (this.wiggle / 300);
   }
 
+  check() {
+
+  }
+  
   //Draw this particle
   draw() {
     let c = this.ctx;

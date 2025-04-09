@@ -97,6 +97,14 @@ class AnimationPlayer {
     if (this.paused) {
       return;
     }
+
+    //Check collisions
+    for (let i = 0; i < this.particles.length; i++) {
+      for (let j = i + 1; j < this.particles.length; j++) {
+        this.particles[i].check(this.particles[j]);
+      }
+    }
+
     context.fillStyle = this.backgroundColor;
     context.fillRect(0, 0, context.canvas.width, context.canvas.height);
     particles.forEach(this.drawParticle);
